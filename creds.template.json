@@ -1,0 +1,10 @@
+{
+    "fromMe": "pi", //Gmail overrides this anyway
+    "toWhom": "anyone@anydomain.com", //Recipient of the message
+    "username": "your_accountn@gmail.com", //To authenticate to the mail server
+    "password": "gobbeldygook", //For gmail, you can use app specific password
+    "mail_server": "smtp.gmail.com:587", //For gmail use "smpt.gmail.com: 587"
+    "use_tls": true, //Must be True for gmail
+    "ip_file_path": "/home/pi/previous_ip.txt", //Text file that stores previous ip addressed
+    "debug": true
+}
