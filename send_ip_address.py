@@ -39,16 +39,20 @@ debug = data['debug']                              # Set to True while testing
 # then return an empty array
 #
 def get_prev_ip(file_path):
-    ips = []
+    ips= []
     try:
-        f = open(file_path, 'r')
+        f= open(file_path, 'r')
     except IOError:     # No such file
         return ips
     # File exists, now read it one line at a time
     for line in f:
-        aa=re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",line.strip())
+        aa = line.strip() if os.name == 'nt' else re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",line.strip())
+        # aa=re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",line.strip())
         if aa is not None:
-            ips.append(aa.group())
+            if os.name == 'nt':
+                ips.append(aa)
+            else:
+                ips.append(aa.group())
     f.close()
     return ips
 
@@ -58,15 +62,22 @@ def get_prev_ip(file_path):
 # Return the address list and an email message
 #
 def get_my_ips():
-    stdin, stdout = os.popen2( 'ifconfig' )
+    ipCmd = 'ipconfig' if os.name == 'nt' else 'ifconfig'
+    stdin, stdout= os.popen2(ipCmd)
     output = stdout.read()
     pi_hostname = socket.gethostname()
-    snagAddrRegex = re.compile( r'inet addr:(?P<addr>\S+?) ' )
-    ipaddrs = snagAddrRegex.findall( output )
-    if( '127.0.0.1' in ipaddrs ):
+    if os.name == 'nt':
+        ipaddrs = output
+    else:
+        snagAddrRegex = re.compile( r'inet addr:(?P<addr>\S+?) ' )
+        ipaddrs = snagAddrRegex.findall( output )
+    if ( '127.0.0.1' in ipaddrs ):
         ipaddrs.remove( '127.0.0.1' )  # get rid of the interface we know is always there, it's just noise
-    msg = MIMEText("%s has ip(s):\n    %s\n\nOutput of command:\n%s" % (pi_hostname, '\n    '.join( ipaddrs ), output))
-    msg["subject"] = "Rasberry Pi: %s has ip(s): %s" % (pi_hostname, ' '.join(ipaddrs))
+    if os.name == 'nt':
+        msg= MIMEText("%s has ip(s):\n    %s\n\nOutput of command:\n%s" % (pi_hostname, ''.join(ipaddrs), output))
+    else:
+        msg = MIMEText("%s has ip(s):\n    %s\n\nOutput of command:\n%s" % (pi_hostname, '\n    '.join( ipaddrs ), output))
+    msg["subject"]= "%s: %s has ip(s): %s" % (fromMe ,pi_hostname, ' '.join(ipaddrs))
     msg["to"] = toWhom
     msg["from"] = fromMe
     if debug:
@@ -91,7 +102,10 @@ def send_mail(msg):
 def write_ips(file_path, ips):
     try:
         f = open(file_path, 'w')
-        f.write('\n'.join(ips) + '\n')
+        if os.name == 'nt':
+            f.write('\n'.join(ips) + '\n')
+        else:
+            f.write(''.join(ips) + '\n')
         f.close()
     except IOError:
         return          # Igonore any error writing to the file
@@ -114,3 +128,4 @@ def main(argv):
 
 if __name__ == "__main__":
     main(sys.argv)
+    
