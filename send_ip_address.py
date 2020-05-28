@@ -4,25 +4,34 @@
 #
 # 2015-05-09, Heimir Sverrisson (heimir.sverrisson@gmail.com)
 #               Based on work by Todd Lawall
-# 
+#
+# Python27
+
 import sys
 import re
 import os
 import time
 import socket
 import smtplib
+import json
 from email.MIMEText import MIMEText
 
+with open("creds.json", "r") as read_file:
+    data = json.load(read_file)
 
-fromMe       = 'pi'                               # Gmail overrides this anyway
-toWhom       = 'anyone@anydomain.com'             # Recipient of the message
-username     = 'your_accountn@gmail.com'          # To authenticate to the mail server
-password     = 'gobbeldygook'                     # For gmail, you can use app specific password
-mail_server  = 'smtp.gmail.com:587'               # For gmail use 'smpt.gmail.com:587'
-use_tls      = True                               # Must be True for gmail
-ip_file_path = '/home/pi/previous_ip.txt'         # Text file that stores previous ip addressed
-debug        = False                              # Set to True while testing
-
+# Gmail overrides this anyway
+fromMe = data['fromMe']
+toWhom = data['toWhom']             # Recipient of the message
+username = data['username']          # To authenticate to the mail server
+# For gmail, you can use app specific password
+password = data['password']
+# For gmail use 'smpt.gmail.com:587'
+mail_server = data['mail_server']
+# Must be True for gmail
+use_tls = data['use_tls']
+# Text file that stores previous ip addressed
+ip_file_path = data['ip_file_path']
+debug = data['debug']                              # Set to True while testing
 
 # Return the ip address from a the file
 # If file does not exist or does not contain
